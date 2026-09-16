@@ -166,7 +166,7 @@ make clean-all     # ... and remove volumes and generated artifacts
 ├── tests                          # unit tests for all three stages
 ├── docs                           # assignment statement + dataset documentation
 ├── docker-compose.yml             # infrastructure: Airflow + MLflow + Postgres
-├── dvc.yaml                       # optional DVC view of stages 1–2 (`dvc repro`)
+├── dvc.yaml / dvc.lock            # optional DVC view of stages 1–2 (`dvc repro`)
 ├── params.yaml                    # single source of truth for the pipeline configuration
 ├── Makefile                       # shortcuts for every operation
 └── requirements.txt
@@ -319,6 +319,15 @@ make test          # or: pytest -v
   each candidate pipeline trains and predicts from **raw** input
 * `tests/test_api.py` — every endpoint plus payload validation, through FastAPI's `TestClient`
 * `tests/test_pipeline_dag.py` — the DAG imports, runs every 5 minutes and contains all three stages
+
+The repository is also DVC-initialised, so stages 1–2 can be reproduced and their artifacts
+versioned outside Airflow:
+
+```bash
+pip install dvc
+dvc repro          # download → prepare → train → validate
+dvc metrics show   # metrics.json + data_report.json
+```
 
 GitHub Actions (`.github/workflows/ci.yml`) runs the unit tests and then executes the **entire
 pipeline** (data → model → containers → smoke test) on every push.

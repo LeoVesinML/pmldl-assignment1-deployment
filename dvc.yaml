@@ -6,6 +6,8 @@
 # also be reproduced and versioned with `dvc repro`.
 #
 #     pip install dvc && dvc repro
+#
+# The repository is already DVC-initialised (.dvc/), so no `dvc init` is needed.
 # ---------------------------------------------------------------------------
 stages:
   download_data:

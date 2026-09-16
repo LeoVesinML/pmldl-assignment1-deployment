@@ -1,0 +1,148 @@
+schema: '2.0'
+stages:
+  download_data:
+    cmd: python code/datasets/download_data.py
+    deps:
+    - path: code/datasets/download_data.py
+      hash: md5
+      md5: b9c2971d1cbc5b3920c2c58370827a7c
+      size: 3012
+    params:
+      params.yaml:
+        data.source_url: 
+          https://archive.ics.uci.edu/static/public/186/wine+quality.zip
+    outs:
+    - path: data/raw/winequality-red.csv
+      hash: md5
+      md5: 2daeecee174368f8a33b82c8cccae3a5
+      size: 84199
+    - path: data/raw/winequality-white.csv
+      hash: md5
+      md5: 5d9ff0f7f716dace19e3ab4578775fd7
+      size: 264426
+  prepare_data:
+    cmd: python code/datasets/prepare_data.py
+    deps:
+    - path: code/config.py
+      hash: md5
+      md5: 1d174985671045578397f0a88e82ee75
+      size: 2087
+    - path: code/datasets/prepare_data.py
+      hash: md5
+      md5: fcfb1072e4b22633bdb30990ee721bdd
+      size: 8578
+    - path: data/raw/winequality-red.csv
+      hash: md5
+      md5: 2daeecee174368f8a33b82c8cccae3a5
+      size: 84199
+    - path: data/raw/winequality-white.csv
+      hash: md5
+      md5: 5d9ff0f7f716dace19e3ab4578775fd7
+      size: 264426
+    params:
+      params.yaml:
+        data:
+          source_url: 
+            https://archive.ics.uci.edu/static/public/186/wine+quality.zip
+          raw_dir: data/raw
+          processed_dir: data/processed
+          red_file: winequality-red.csv
+          white_file: winequality-white.csv
+          good_quality_threshold: 6
+          outlier_method: iqr
+          iqr_multiplier: 3.0
+          max_outlier_fraction: 0.15
+          test_size: 0.2
+          random_state: 42
+    outs:
+    - path: data/processed/data_report.json
+      hash: md5
+      md5: fd27d93b2c6471ed89b32b214d96859d
+      size: 871
+    - path: data/processed/test.csv
+      hash: md5
+      md5: acf457ab3dcd538afe6919a6c32e1d5a
+      size: 64867
+    - path: data/processed/train.csv
+      hash: md5
+      md5: 4b755ea2e922b66774a79a7bcb4bce0e
+      size: 258750
+  train_model:
+    cmd: python code/models/train.py
+    deps:
+    - path: code/config.py
+      hash: md5
+      md5: 1d174985671045578397f0a88e82ee75
+      size: 2087
+    - path: code/models/features.py
+      hash: md5
+      md5: 50d250e034a06735e82c3174b3fa488c
+      size: 4590
+    - path: code/models/train.py
+      hash: md5
+      md5: 244c2c3ef676a5ac218f4e99a561afec
+      size: 15090
+    - path: data/processed/test.csv
+      hash: md5
+      md5: acf457ab3dcd538afe6919a6c32e1d5a
+      size: 64867
+    - path: data/processed/train.csv
+      hash: md5
+      md5: 4b755ea2e922b66774a79a7bcb4bce0e
+      size: 258750
+    params:
+      params.yaml:
+        mlflow:
+          tracking_uri: http://mlflow:5000
+          experiment_name: wine-quality-classification
+          registered_model_name: wine-quality-classifier
+        model:
+          candidates:
+          - logistic_regression
+          - random_forest
+          - hist_gradient_boosting
+          cv_folds: 5
+          selection_metric: f1
+          random_state: 42
+          model_dir: models
+          model_file: model.joblib
+          metrics_file: metrics.json
+          metadata_file: model_metadata.json
+    outs:
+    - path: models/metrics.json
+      hash: md5
+      md5: 93fe7ca23a0ab64b837f7b2796990926
+      size: 751
+    - path: models/model.joblib
+      hash: md5
+      md5: 362b2c4dd36f96999064cf1fa892664b
+      size: 24075096
+    - path: models/model_metadata.json
+      hash: md5
+      md5: 7110ec40096cfb35535acf95084be49f
+      size: 4074
+  validate_model:
+    cmd: python code/models/validate_model.py
+    deps:
+    - path: code/models/validate_model.py
+      hash: md5
+      md5: 215215a64d742f2e9bb38fb1d77846ee
+      size: 3101
+    - path: models/metrics.json
+      hash: md5
+      md5: 93fe7ca23a0ab64b837f7b2796990926
+      size: 751
+    - path: models/model.joblib
+      hash: md5
+      md5: 362b2c4dd36f96999064cf1fa892664b
+      size: 24075096
+    - path: models/model_metadata.json
+      hash: md5
+      md5: 7110ec40096cfb35535acf95084be49f
+      size: 4074
+    params:
+      params.yaml:
+        validation:
+          min_f1: 0.7
+          min_roc_auc: 0.75
+          min_accuracy: 0.7
