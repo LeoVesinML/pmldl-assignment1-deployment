@@ -1,5 +1,7 @@
 # 🍷 Wine Quality MLOps Pipeline — PMLDL Assignment 1 (Deployment)
 
+[![CI](https://github.com/LeoVesinML/pmldl-assignment1-deployment/actions/workflows/ci.yml/badge.svg)](https://github.com/LeoVesinML/pmldl-assignment1-deployment/actions/workflows/ci.yml)
+
 An end-to-end, **fully automated MLOps pipeline** that runs **every 5 minutes** and covers the
 three required stages: **data engineering → model engineering → deployment**.
 The trained model is served by a **FastAPI** container and consumed by a **Streamlit** web
@@ -71,8 +73,8 @@ flowchart LR
 ### Run the full automated pipeline (recommended)
 
 ```bash
-git clone <this-repository-url>
-cd <repository>
+git clone https://github.com/LeoVesinML/pmldl-assignment1-deployment.git
+cd pmldl-assignment1-deployment
 
 # optional: change the host ports if some of them are already taken
 cp .env.example .env
