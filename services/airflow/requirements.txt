@@ -1,0 +1,13 @@
+# Python packages added on top of the official Airflow image so that the DAG
+# can execute stage 1 and stage 2 in-process.
+# The versions are identical to the ones used by the API image, which keeps the
+# pickled scikit-learn pipeline binary-compatible between training and serving.
+pandas==2.1.4
+numpy==1.26.4
+scipy==1.13.1
+scikit-learn==1.5.2
+joblib==1.4.2
+PyYAML==6.0.2
+mlflow==2.17.2
+requests==2.32.3
+protobuf==4.25.5  # keeps MLflow compatible with the OpenTelemetry stack shipped in Airflow

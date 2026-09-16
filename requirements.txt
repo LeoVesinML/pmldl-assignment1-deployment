@@ -1,0 +1,35 @@
+# ---------------------------------------------------------------------------
+# Full pipeline requirements (local / virtual-environment usage).
+# The Docker images install narrower subsets:
+#   * services/airflow/requirements.txt  - orchestration + stages 1-2
+#   * code/deployment/api/requirements.txt - serving
+#   * code/deployment/app/requirements.txt - web app
+# ---------------------------------------------------------------------------
+
+# --- stage 1: data engineering ---
+pandas==2.1.4
+numpy==1.26.4
+scipy==1.13.1
+PyYAML==6.0.2
+
+# --- stage 2: model engineering ---
+scikit-learn==1.5.2
+joblib==1.4.2
+mlflow==2.17.2
+
+# --- stage 3: deployment ---
+fastapi==0.115.6
+uvicorn[standard]==0.34.0
+pydantic==2.10.4
+streamlit==1.41.1
+requests==2.32.3
+
+# --- orchestration (installed inside the Airflow image as well) ---
+apache-airflow==2.10.5
+
+# --- optional: DVC pipeline as an alternative to Airflow for stages 1-2 ---
+dvc==3.56.0
+
+# --- development / testing ---
+pytest==8.3.4
+httpx==0.28.1

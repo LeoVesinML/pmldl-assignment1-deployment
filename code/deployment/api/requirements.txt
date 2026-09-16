@@ -1,0 +1,11 @@
+# Runtime dependencies of the model API container.
+# scikit-learn / numpy / pandas are pinned to the exact versions used for
+# training (see requirements.txt) so the pickled pipeline loads without warnings.
+fastapi==0.115.6
+uvicorn[standard]==0.34.0
+pydantic==2.10.4
+scikit-learn==1.5.2
+pandas==2.1.4
+numpy==1.26.4
+joblib==1.4.2
+scipy==1.13.1

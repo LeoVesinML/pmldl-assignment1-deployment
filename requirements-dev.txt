@@ -1,0 +1,14 @@
+# Dependencies required to run the unit tests (`make test`).
+# Deliberately free of Airflow/DVC so the test suite stays fast; the DAG tests
+# skip themselves when Airflow is not installed.
+pandas==2.1.4
+numpy==1.26.4
+scipy==1.13.1
+scikit-learn==1.5.2
+joblib==1.4.2
+PyYAML==6.0.2
+fastapi==0.115.6
+pydantic==2.10.4
+requests==2.32.3
+pytest==8.3.4
+httpx==0.28.1

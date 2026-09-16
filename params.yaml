@@ -1,0 +1,52 @@
+# ---------------------------------------------------------------------------
+# Central configuration for the whole MLOps pipeline.
+# Every stage (data engineering, model engineering, deployment) reads it, so
+# the pipeline behaviour can be changed without touching the code.
+# ---------------------------------------------------------------------------
+
+data:
+  # Remote source of the raw data (UCI Wine Quality dataset).
+  source_url: "https://archive.ics.uci.edu/static/public/186/wine+quality.zip"
+  raw_dir: "data/raw"
+  processed_dir: "data/processed"
+  red_file: "winequality-red.csv"
+  white_file: "winequality-white.csv"
+  # A wine is labelled "good" when its expert quality score is >= this value.
+  good_quality_threshold: 6
+  # Outlier removal: rows whose numeric features fall outside
+  # [Q1 - iqr_multiplier * IQR, Q3 + iqr_multiplier * IQR] are dropped.
+  outlier_method: "iqr"
+  iqr_multiplier: 3.0
+  # Safety valve: never drop more than this fraction of the dataset.
+  max_outlier_fraction: 0.15
+  test_size: 0.2
+  random_state: 42
+
+model:
+  # Candidate models trained on every pipeline run; the best one wins.
+  candidates: ["logistic_regression", "random_forest", "hist_gradient_boosting"]
+  cv_folds: 5
+  # Metric used to select the best candidate and to gate the deployment.
+  selection_metric: "f1"
+  random_state: 42
+  model_dir: "models"
+  model_file: "model.joblib"
+  metrics_file: "metrics.json"
+  metadata_file: "model_metadata.json"
+
+validation:
+  # Deployment is blocked if the champion model is worse than these thresholds.
+  min_f1: 0.70
+  min_roc_auc: 0.75
+  min_accuracy: 0.70
+
+mlflow:
+  tracking_uri: "http://mlflow:5000"
+  experiment_name: "wine-quality-classification"
+  registered_model_name: "wine-quality-classifier"
+
+deployment:
+  compose_project_name: "pmldl-deployment"
+  compose_file: "code/deployment/docker-compose.yml"
+  api_port: 8000
+  app_port: 8501

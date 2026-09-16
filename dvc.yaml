@@ -1,0 +1,67 @@
+# ---------------------------------------------------------------------------
+# Optional DVC view of stages 1 and 2.
+#
+# The pipeline is orchestrated by Airflow (see services/airflow/dags), but the
+# very same scripts are exposed as a DVC pipeline so the data/model stages can
+# also be reproduced and versioned with `dvc repro`.
+#
+#     pip install dvc && dvc repro
+# ---------------------------------------------------------------------------
+stages:
+  download_data:
+    cmd: python code/datasets/download_data.py
+    deps:
+      - code/datasets/download_data.py
+    params:
+      - data.source_url
+    outs:
+      - data/raw/winequality-red.csv:
+          persist: true
+          cache: false
+      - data/raw/winequality-white.csv:
+          persist: true
+          cache: false
+
+  prepare_data:
+    cmd: python code/datasets/prepare_data.py
+    deps:
+      - code/datasets/prepare_data.py
+      - code/config.py
+      - data/raw/winequality-red.csv
+      - data/raw/winequality-white.csv
+    params:
+      - data
+    outs:
+      - data/processed/train.csv
+      - data/processed/test.csv
+    metrics:
+      - data/processed/data_report.json:
+          cache: false
+
+  train_model:
+    cmd: python code/models/train.py
+    deps:
+      - code/models/train.py
+      - code/models/features.py
+      - code/config.py
+      - data/processed/train.csv
+      - data/processed/test.csv
+    params:
+      - model
+      - mlflow
+    outs:
+      - models/model.joblib
+      - models/model_metadata.json
+    metrics:
+      - models/metrics.json:
+          cache: false
+
+  validate_model:
+    cmd: python code/models/validate_model.py
+    deps:
+      - code/models/validate_model.py
+      - models/model.joblib
+      - models/metrics.json
+      - models/model_metadata.json
+    params:
+      - validation

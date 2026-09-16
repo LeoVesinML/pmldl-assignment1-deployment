@@ -1,0 +1,64 @@
+# ---------------------------------------------------------------------------
+# Stage 3 - deployment.
+# Two independent containers: the model API and the web application.
+# Started by the Airflow DAG (task `deployment.build_and_deploy`) or manually:
+#
+#     docker compose -f code/deployment/docker-compose.yml up -d --build
+#
+# Both images are built from the repository root, so the freshly trained model
+# in ./models is baked into the API image on every pipeline run.
+# ---------------------------------------------------------------------------
+name: pmldl-deployment
+
+services:
+  api:
+    build:
+      context: ../..
+      dockerfile: code/deployment/api/Dockerfile
+    image: pmldl/wine-api:latest
+    container_name: pmldl-api
+    restart: unless-stopped
+    environment:
+      MODEL_PATH: /app/models/model.joblib
+      MODEL_METADATA_PATH: /app/models/model_metadata.json
+      DECISION_THRESHOLD: "0.5"
+      LOG_LEVEL: INFO
+    ports:
+      - "${API_PORT:-8000}:8000"
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:8000/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    networks:
+      - pmldl
+
+  app:
+    build:
+      context: ../..
+      dockerfile: code/deployment/app/Dockerfile
+    image: pmldl/wine-app:latest
+    container_name: pmldl-app
+    restart: unless-stopped
+    environment:
+      # The app reaches the API through the compose network, by service name.
+      API_URL: http://api:8000
+    ports:
+      - "${APP_PORT:-8501}:8501"
+    depends_on:
+      api:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:8501/_stcore/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    networks:
+      - pmldl
+
+networks:
+  pmldl:
+    name: pmldl-deployment-net
+    driver: bridge
