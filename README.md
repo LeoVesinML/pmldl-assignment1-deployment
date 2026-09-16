@@ -78,6 +78,8 @@ cd pmldl-assignment1-deployment
 
 # optional: change the host ports if some of them are already taken
 cp .env.example .env
+# on Linux only: make the bind-mounted folders writable by Airflow
+echo "AIRFLOW_UID=$(id -u)" >> .env
 
 # build and start Airflow + MLflow; the DAG is active immediately
 docker compose up -d --build        # or: make up
